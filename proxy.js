@@ -14,19 +14,41 @@ app.use(express.json());
 
 const API_KEY = 'a40fe6499d6348ffb9dd4fb2e2e6d5d5_3d49f5adaf614e72917f3a4ade4b1e0b_andoraitools';
 
-// Route for the root URL
+// Root route
 app.get('/', (req, res) => {
     res.send('Welcome to the Proxy Server! The API is running.');
 });
 
-// Proxy route for initiating face swap
-app.post('/api/face-swap', async (req, res) => {
-    console.log('Request received:', req.body); // Log the incoming request body
+// Proxy route for generating an image upload URL
+app.post('/api/upload-url', async (req, res) => {
+    const { size, contentType } = req.body;
 
     try {
-        const { imageUrl, styleImageUrl } = req.body;
+        const response = await fetch('https://api.lightxeditor.com/external/api/v2/uploadImageUrl', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': API_KEY
+            },
+            body: JSON.stringify({
+                uploadType: "imageUrl",
+                size,
+                contentType
+            })
+        });
 
-        console.log('Processing face swap with:', imageUrl, styleImageUrl); // Debug inputs
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Error:', error.message);
+        res.status(500).json({ error: 'Failed to get upload URL', details: error.message });
+    }
+});
+
+// Proxy route for initiating face swap
+app.post('/api/face-swap', async (req, res) => {
+    try {
+        const { imageUrl, styleImageUrl } = req.body;
 
         const response = await fetch('https://api.lightxeditor.com/external/api/v1/face-swap', {
             method: 'POST',
@@ -40,11 +62,10 @@ app.post('/api/face-swap', async (req, res) => {
         const data = await response.json();
         res.status(response.status).json(data);
     } catch (error) {
-        console.error('Error:', error.message); // Log any errors
+        console.error('Error:', error.message);
         res.status(500).json({ error: 'Failed to initiate face swap', details: error.message });
     }
 });
-
 
 // Proxy route for checking order status
 app.post('/api/order-status', async (req, res) => {
@@ -63,6 +84,7 @@ app.post('/api/order-status', async (req, res) => {
         const data = await response.json();
         res.status(response.status).json(data);
     } catch (error) {
+        console.error('Error:', error.message);
         res.status(500).json({ error: 'Failed to check order status', details: error.message });
     }
 });
