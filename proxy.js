@@ -12,7 +12,8 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 //api
-const API_KEY = 'a6c1d363e15547bd9e58134edd49e90d_90b0e44d1e024495855a22217b79b202_andoraitools';
+//const API_KEY = 'a6c1d363e15547bd9e58134edd49e90d_90b0e44d1e024495855a22217b79b202_andoraitools';
+const API_KEY = process.env.API_KEY;
 
 // Root route
 app.get('/', (req, res) => {
